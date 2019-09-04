@@ -1,64 +1,102 @@
 class EvolutionGraph extends PApplet {
   
-   EvolutionGraph() {
-       super();
-       PApplet.runSketch(new String[] {this.getClass().getSimpleName()}, this);
-   }
+  EvolutionGraph() {
+    super();
+    PApplet.runSketch(new String[] {this.getClass().getSimpleName()}, this);
+  }
    
-   void settings() {
-      size(900,600); 
-   }
+  void settings() {
+    size(900,600); 
+  }
    
-   void setup() {
-       background(150);
-       frameRate(30);
-   }
-   
-   void draw() {
-      background(150);
-      fill(0);
-      strokeWeight(1);
-      textSize(15);
-      textAlign(CENTER,CENTER);
-      text("Generation", width/2,height-10);
-      translate(10,height/2);
-      rotate(PI/2);
-      text("Score", 0,0);
-      rotate(-PI/2);
-      translate(-10,-height/2);
-      textSize(10);
-      float x = 50;
-      float y = height-35;
-      float xbuff = (width-50) / 51.0;
-      float ybuff = (height-50) / 200.0;
-      for(int i=0; i<=50; i++) {
-         text(i,x,y); 
-         x+=xbuff;
+  void setup() {
+    background(150);
+    frameRate(1);
+  }
+  
+  void draw() {
+    // portion de l'evolution a dessiner 
+    int start = max( 0, evolution.size()-52 );
+    int stop = start + 52;
+    float top;
+    if( evolution.size()<2 )
+      top = 5;
+    else
+      top = max( ceil(1.1*evolution.get(evolution.size()-1)), 5 );
+    background(150);  // Fond
+      
+    // Label "Generation"
+    fill(255);
+    strokeWeight(1);
+    textSize(15);
+    textAlign(CENTER,CENTER);
+    text("Generation", width/2,height-20);
+
+    // Graduation Generation
+    textSize(10);
+    textAlign(CENTER,CENTER);
+    float x = 50;
+    float y = height-35;
+    for(int i=start; i<=stop; i++) {
+      text(i,x,y); 
+      x += 16;
+    }
+      
+    // Label "Score"
+    textSize(15);
+    rotate(PI/2);
+    textAlign(CENTER,CENTER);
+    text("Score", (height-50) / 2 , -15);
+    rotate(-PI/2);
+      
+    // Graduation Score
+    textSize(10);
+    textAlign(RIGHT,CENTER);
+    float ybuff = (height-50) / top;
+    y = height-50;
+    float ydif = ybuff * (top/20);
+    for(float i=0; i<top; i+=(top/20) ) {
+      text( i, 40, y ); 
+      y -= ydif;
+    }
+
+    // Dessin des lignes horizontales
+    stroke(64);
+    y = height-50;
+    for(int i=0; i<200; i+=10) {
+      line(50,y,width,y);
+      y-=ydif;
+    }
+
+    // Ligne bas et gauche du graphique 
+    stroke(64);
+    strokeWeight(4);
+    line(50,0,50,height-50);
+    line(50,height-50,width,height-50);
+
+    /**********************\
+      Dessin de la courbe
+    \**********************/
+    strokeWeight(2);
+    //stroke(255,0,0);
+    int oldScore = 0;  // Score de départ
+    if( evolution.size()>0 ) oldScore = evolution.get( start );  // Score de départ
+    int i = 0;
+    int newscore = 0;
+    stroke(128,255,128);
+    for(int ix = start; ix < stop; ix++) {
+      if( ix<evolution.size() ){
+        newscore = evolution.get(ix);
+        line( 50+(i*16), height-50-(oldScore*ybuff), 50+((i+1)*16), height-50-(newscore*ybuff));
+        ellipse(  50+((i+1)*16), height-50-(newscore*ybuff) , 5 , 5);
+        oldScore = newscore;
+        i++;
       }
-      x = 35;
-      y = height-50;
-      float ydif = ybuff * 10.0;
-      for(int i=0; i<200; i+=10) {
-         text(i,x,y); 
-         line(50,y,width,y);
-         y-=ydif;
-      }
-      strokeWeight(2);
-      stroke(255,0,0);
-      int score = 0;
-      for(int i=0; i<evolution.size(); i++) {
-         int newscore = evolution.get(i);
-         line(50+(i*xbuff),height-50-(score*ybuff),50+((i+1)*xbuff),height-50-(newscore*ybuff));
-         score = newscore;
-      }
-      stroke(0);
-      strokeWeight(5);
-      line(50,0,50,height-50);
-      line(50,height-50,width,height-50);
-   }
-   
-   void exit() {
-      dispose();
-      graph = null;
-   }
+    }
+  }
+
+  void exit() {
+    dispose();
+    graph = null;
+  }
 }
